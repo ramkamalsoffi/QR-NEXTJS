@@ -7,7 +7,7 @@ import Breadcrumb from '@/components/Breadcrumb'
 import { QrCode, Download, ExternalLink } from 'lucide-react'
 
 export default function QRScanPage() {
-  const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://qr-demo-frontend.vercel.app'
+  const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://qr-nextjs-da4a.vercel.app'
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(frontendUrl)}`
 
   const handleDownloadQR = () => {

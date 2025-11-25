@@ -49,6 +49,12 @@ export const useUniqueCustomers = () => {
   return useQuery({
     queryKey: ['customers', 'unique'],
     queryFn: customersApi.getUnique,
+    staleTime: 0, // Always consider data stale, fetch fresh data
+    gcTime: 0, // Don't cache data (formerly cacheTime)
+    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnReconnect: true, // Refetch when network reconnects
+    refetchInterval: 10000, // Auto-refetch every 10 seconds
   });
 };
 
@@ -65,7 +71,11 @@ export const useDeleteCustomer = () => {
   return useMutation({
     mutationFn: customersApi.delete,
     onSuccess: () => {
+      // Invalidate both regular customers and unique customers queries
       queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customers', 'unique'] });
+      // Force refetch
+      queryClient.refetchQueries({ queryKey: ['customers', 'unique'] });
     },
   });
 };

@@ -16,7 +16,8 @@ import {
   Smartphone,
   Globe,
   Calendar,
-  History
+  History,
+  RefreshCw
 } from 'lucide-react'
 import { useUniqueCustomers, useDeleteCustomer } from '@/lib/admin/hooks/useCustomers'
 import { UniqueCustomer } from '@/lib/admin/types'
@@ -28,8 +29,13 @@ export default function CustomersPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<UniqueCustomer | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
 
-  const { data: uniqueCustomers, isLoading, error } = useUniqueCustomers()
+  const { data: uniqueCustomers, isLoading, error, refetch, isRefetching } = useUniqueCustomers()
   const deleteCustomer = useDeleteCustomer()
+  
+  // Add manual refresh capability
+  const handleRefresh = () => {
+    refetch()
+  }
 
   const filteredCustomers = uniqueCustomers?.filter(customer =>
     customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -88,6 +94,15 @@ export default function CustomersPage() {
             { label: 'Customers', href: '/admin/dashboard/customers', active: true },
           ]}
         />
+        <button
+          onClick={handleRefresh}
+          disabled={isRefetching}
+          className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+          title="Refresh customers list"
+        >
+          <RefreshCw size={18} className={isRefetching ? 'animate-spin' : ''} />
+          Refresh
+        </button>
       </div>
 
       {/* Search and Filter */}

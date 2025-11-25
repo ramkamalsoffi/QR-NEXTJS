@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { CustomerModel } from '@/lib/models/customer.model';
 import { ApiResult } from '@/lib/utils/api-result';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(req: NextRequest) {
     try {
         const uniqueCustomers = await CustomerModel.findUniqueCustomers();
@@ -23,7 +26,12 @@ export async function GET(req: NextRequest) {
             })
         );
         
-        return NextResponse.json(ApiResult.success(customersWithDetails));
+        const response = NextResponse.json(ApiResult.success(customersWithDetails));
+        // Prevent caching
+        response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        response.headers.set('Pragma', 'no-cache');
+        response.headers.set('Expires', '0');
+        return response;
     } catch (error: any) {
         return NextResponse.json(
             ApiResult.error(error.message || 'Failed to fetch unique customers'),

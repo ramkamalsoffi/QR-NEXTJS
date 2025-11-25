@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useRef, useMemo } from 'react'
 import Breadcrumb from '@/components/Breadcrumb'
+import { ToastContainer, Toast } from '@/components/Toast'
 import {
     Plus,
     Filter,
@@ -37,6 +38,18 @@ export default function BatchesPage() {
     const [batchNo, setBatchNo] = useState('')
     const [pdfFile, setPdfFile] = useState<File | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    
+    // Toast state
+    const [toasts, setToasts] = useState<Toast[]>([])
+
+    const showToast = (message: string, type: Toast['type'] = 'error') => {
+        const id = Math.random().toString(36).substring(7)
+        setToasts((prev) => [...prev, { id, message, type }])
+    }
+
+    const removeToast = (id: string) => {
+        setToasts((prev) => prev.filter((toast) => toast.id !== id))
+    }
 
     const { data: batches, isLoading: isBatchesLoading, error } = useBatches()
     const { data: products } = useProducts()
@@ -95,7 +108,7 @@ export default function BatchesPage() {
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!batchNo || batchNo.trim() === '') {
-            alert('Please enter a batch number')
+            showToast('Please enter a batch number', 'error')
             return
         }
         try {
@@ -107,8 +120,25 @@ export default function BatchesPage() {
             })
             setIsAddModalOpen(false)
             resetForm()
-        } catch (error) {
+            showToast('Batch created successfully!', 'success')
+        } catch (error: any) {
             console.error('Failed to create batch:', error)
+            // Extract error message from axios response
+            const errorMessage = error?.response?.data?.message || 
+                                error?.response?.data?.error || 
+                                error?.message || 
+                                'Failed to create batch'
+            
+            // Check if it's a duplicate batch number error
+            const lowerMessage = errorMessage.toLowerCase()
+            if (lowerMessage.includes('already exists') || 
+                lowerMessage.includes('duplicate') || 
+                lowerMessage.includes('unique constraint') ||
+                lowerMessage.includes('batch number') && lowerMessage.includes('exists')) {
+                showToast(`Batch number "${batchNo.trim()}" already exists. Please use a different batch number.`, 'error')
+            } else {
+                showToast(errorMessage, 'error')
+            }
         }
     }
 
@@ -185,6 +215,8 @@ export default function BatchesPage() {
 
     return (
         <div className="space-y-6">
+            <ToastContainer toasts={toasts} onClose={removeToast} />
+            
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <Breadcrumb
                     items={[

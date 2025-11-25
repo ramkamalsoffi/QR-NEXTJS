@@ -21,14 +21,15 @@ export async function POST(req: NextRequest) {
         const formData = await req.formData();
         const productId = formData.get('productId') as string;
         const packageId = formData.get('packageId') as string;
+        const batchNo = formData.get('batchNo') as string;
         const pdfFile = formData.get('pdfFile') as File | null;
 
-        console.log('Received data:', { productId, packageId, hasPdfFile: !!pdfFile });
+        console.log('Received data:', { productId, packageId, batchNo, hasPdfFile: !!pdfFile });
 
-        if (!productId || !packageId) {
-            console.log('Validation failed: missing productId or packageId');
+        if (!productId || !packageId || !batchNo) {
+            console.log('Validation failed: missing required fields');
             return NextResponse.json(
-                ApiResult.error('Product ID and Package ID are required'),
+                ApiResult.error('Product ID, Package ID, and Batch Number are required'),
                 { status: 400 }
             );
         }
@@ -50,10 +51,11 @@ export async function POST(req: NextRequest) {
             console.log('No PDF file provided');
         }
 
-        console.log('Creating batch with:', { productId, packageId, reportPdfUrl });
+        console.log('Creating batch with:', { productId, packageId, batchNo, reportPdfUrl });
         const batch = await BatchNumberModel.create({
             productId,
             packageId,
+            batchNo,
             reportPdfUrl,
         });
         console.log('Batch created successfully:', batch.id);

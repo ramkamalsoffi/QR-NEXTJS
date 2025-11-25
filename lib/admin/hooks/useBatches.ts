@@ -28,6 +28,7 @@ const batchesApi = {
         const formData = new FormData();
         formData.append('productId', data.productId);
         formData.append('packageId', data.packageId);
+        formData.append('batchNo', data.batchNo);
         if (data.pdfFile) {
             formData.append('pdfFile', data.pdfFile);
         }

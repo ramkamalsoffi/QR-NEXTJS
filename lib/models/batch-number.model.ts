@@ -1,9 +1,9 @@
 import prisma from '../prisma';
-import { generateBatchNumber } from '../utils/batch-generator';
 
 export interface CreateBatchNumberDto {
     productId: string;
     packageId: string;
+    batchNo: string;
     reportPdfUrl?: string;
 }
 
@@ -88,10 +88,10 @@ export class BatchNumberModel {
     }
 
     /**
-     * Create a new batch number with auto-generated batch code
+     * Create a new batch number with provided batch number
      */
     static async create(data: CreateBatchNumberDto) {
-        // Get product and package to generate batch number
+        // Validate product and package exist
         const product = await prisma.product.findUnique({
             where: { id: data.productId },
         });
@@ -104,8 +104,13 @@ export class BatchNumberModel {
             throw new Error('Product or package not found');
         }
 
-        // Generate batch number
-        const batchNo = generateBatchNumber(product.name, productPackage.packageName);
+        // Validate batch number is provided
+        if (!data.batchNo || data.batchNo.trim() === '') {
+            throw new Error('Batch number is required');
+        }
+
+        // Normalize batch number (trim and convert to uppercase)
+        const batchNo = data.batchNo.trim().toUpperCase();
 
         // Check if batch number already exists
         const existing = await prisma.batchNumber.findUnique({

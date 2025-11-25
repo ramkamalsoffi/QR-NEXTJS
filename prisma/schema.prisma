@@ -38,7 +38,7 @@ model BatchNumber {
   product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
   packageId    String
   package      ProductPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
-  batchNo      String         @unique // Auto-generated: PE100MG
+  batchNo      String         @unique // Admin-provided batch number
   reportPdfUrl String?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt

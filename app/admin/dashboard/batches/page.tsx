@@ -34,6 +34,7 @@ export default function BatchesPage() {
     // Form state
     const [selectedProductId, setSelectedProductId] = useState('')
     const [selectedPackageId, setSelectedPackageId] = useState('')
+    const [batchNo, setBatchNo] = useState('')
     const [pdfFile, setPdfFile] = useState<File | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -93,10 +94,15 @@ export default function BatchesPage() {
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault()
+        if (!batchNo || batchNo.trim() === '') {
+            alert('Please enter a batch number')
+            return
+        }
         try {
             await createBatch.mutateAsync({
                 productId: selectedProductId,
                 packageId: selectedPackageId,
+                batchNo: batchNo.trim(),
                 pdfFile: pdfFile || undefined
             })
             setIsAddModalOpen(false)
@@ -137,6 +143,7 @@ export default function BatchesPage() {
     const resetForm = () => {
         setSelectedProductId('')
         setSelectedPackageId('')
+        setBatchNo('')
         setPdfFile(null)
         if (fileInputRef.current) {
             fileInputRef.current.value = ''
@@ -380,6 +387,20 @@ export default function BatchesPage() {
                                 </select>
                             </div>
 
+                            {/* Batch Number Input */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Batch Number</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={batchNo}
+                                    onChange={(e) => setBatchNo(e.target.value.toUpperCase())}
+                                    placeholder="e.g., PE100MG, CH500MG"
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                                />
+                                <p className="text-xs text-slate-500 mt-1">Enter a unique batch number</p>
+                            </div>
+
                             {/* PDF Upload */}
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Upload Report PDF (Optional)</label>
@@ -396,10 +417,6 @@ export default function BatchesPage() {
                                         {pdfFile ? pdfFile.name : 'Click to upload PDF'}
                                     </p>
                                 </div>
-                            </div>
-
-                            <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-700">
-                                <p>Batch number will be auto-generated based on product and package selection.</p>
                             </div>
 
                             <div className="flex justify-end gap-3 pt-4">

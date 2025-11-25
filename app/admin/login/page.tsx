@@ -4,20 +4,32 @@ export const dynamic = 'force-dynamic'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogIn, Lock, Mail } from 'lucide-react'
+import { LogIn, Lock, Mail, AlertCircle } from 'lucide-react'
+
+// Static login credentials
+const STATIC_EMAIL = 'admin@qrdemo.com'
+const STATIC_PASSWORD = 'admin123'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('admin@qrdemo.com')
-  const [password, setPassword] = useState('admin123')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
     setIsLoading(true)
 
-    // Simple login without API - just validate and redirect
-    // You can add client-side validation here if needed
+    // Validate credentials
+    if (email.trim() !== STATIC_EMAIL || password !== STATIC_PASSWORD) {
+      setIsLoading(false)
+      setError('Wrong credentials. Please check your email and password.')
+      return
+    }
+
+    // Simulate API call delay
     setTimeout(() => {
       setIsLoading(false)
       // Store mock auth token for API calls
@@ -28,7 +40,7 @@ export default function LoginPage() {
         name: 'Admin User',
         category: 'ADMIN'
       }))
-      router.push('/admin/dashboard/products')
+      router.push('/admin/dashboard')
     }, 500)
   }
 
@@ -54,6 +66,14 @@ export default function LoginPage() {
             <p className="text-slate-600">Sign in to your admin account</p>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-fade-in">
+              <AlertCircle className="text-red-600 flex-shrink-0" size={20} />
+              <p className="text-red-800 text-sm font-medium">{error}</p>
+            </div>
+          )}
+
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -72,8 +92,13 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-300 outline-none transition-all"
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    setError('') // Clear error when user types
+                  }}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-300 outline-none transition-all ${
+                    error ? 'border-red-300' : 'border-slate-300'
+                  }`}
                   placeholder="Enter your email"
                   required
                 />
@@ -96,8 +121,13 @@ export default function LoginPage() {
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-300 outline-none transition-all"
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    setError('') // Clear error when user types
+                  }}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-300 outline-none transition-all ${
+                    error ? 'border-red-300' : 'border-slate-300'
+                  }`}
                   placeholder="Enter your password"
                   required
                 />
@@ -125,8 +155,8 @@ export default function LoginPage() {
 
           {/* Footer */}
           <div className="mt-6 text-center text-sm text-slate-500">
-            <p>Demo credentials are pre-filled</p>
-            <p className="text-xs mt-1">Email: {email} | Password: admin123</p>
+            <p>Admin Login</p>
+            <p className="text-xs mt-1">Email: {STATIC_EMAIL} | Password: {STATIC_PASSWORD}</p>
           </div>
         </div>
       </div>

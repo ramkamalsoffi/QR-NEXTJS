@@ -217,7 +217,7 @@ export default function PackagesPage() {
                         <Box className="mx-auto text-slate-300 mb-4" size={48} />
                         <p className="text-slate-600 font-medium">No packages found</p>
                         <p className="text-slate-400 text-sm mt-1">
-                            {searchTerm ? 'Try adjusting your search' : 'Create a product and add packages to get started'}
+                            {filterProduct ? 'Try adjusting your filters' : 'Create a product and add packages to get started'}
                         </p>
                     </div>
                 ) : (

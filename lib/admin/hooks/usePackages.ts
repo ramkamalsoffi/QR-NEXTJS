@@ -52,6 +52,7 @@ export const useCreatePackage = () => {
         mutationFn: packagesApi.create,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['packages', data.productId] });
+            queryClient.invalidateQueries({ queryKey: ['products'] }); // Refresh products to update packages list
         },
     });
 };
@@ -63,6 +64,7 @@ export const useUpdatePackage = () => {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['packages', data.productId] });
             queryClient.invalidateQueries({ queryKey: ['package', data.id] });
+            queryClient.invalidateQueries({ queryKey: ['products'] }); // Refresh products to update packages list
         },
     });
 };
@@ -75,6 +77,7 @@ export const useDeletePackage = () => {
             // We need to invalidate all packages queries since we don't know the productId here easily
             // Alternatively, we could pass productId to the delete mutation
             queryClient.invalidateQueries({ queryKey: ['packages'] });
+            queryClient.invalidateQueries({ queryKey: ['products'] }); // Refresh products to update packages list
         },
     });
 };

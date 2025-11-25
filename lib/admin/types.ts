@@ -56,6 +56,7 @@ export interface BatchNumber {
 export interface CreateBatchNumberDto {
   productId: string;
   packageId: string;
+  batchNo: string;
   pdfFile?: File;
 }
 

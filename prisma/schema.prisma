@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Product {
+  id           String           @id @default(uuid())
+  name         String           @unique
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  packages     ProductPackage[]
+  batchNumbers BatchNumber[]
+}
+
+model ProductPackage {
+  id           String        @id @default(uuid())
+  productId    String
+  product      Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  packageName  String        // e.g., "100mg", "250mg", "500mg"
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  batchNumbers BatchNumber[]
+
+  @@unique([productId, packageName])
+}
+
+model BatchNumber {
+  id           String         @id @default(uuid())
+  productId    String
+  product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  packageId    String
+  package      ProductPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  batchNo      String         @unique // Auto-generated: PE100MG
+  reportPdfUrl String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  customers    Customer[]
+}
+
+model Customer {
+  id          String      @id @default(uuid())
+  customerId  String      // Generated from email hash or unique identifier
+  email       String
+  batchNoId   String
+  batchNumber BatchNumber @relation(fields: [batchNoId], references: [id])
+  ipAddress   String
+  device      String?
+  os          String?
+  location    String?
+  browser     String?
+  submittedAt DateTime    @default(now())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([customerId])
+  @@index([email])
+}

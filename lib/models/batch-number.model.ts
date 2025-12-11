@@ -148,11 +148,18 @@ export class BatchNumberModel {
     }
 
     /**
-     * Delete a batch number
+     * Delete a batch number (cascades to customers)
      */
     static async delete(id: string) {
-        return await prisma.batchNumber.delete({
-            where: { id },
+        return await prisma.$transaction(async (tx) => {
+            // Delete associated customers
+            await tx.customer.deleteMany({
+                where: { batchNoId: id },
+            });
+
+            return await tx.batchNumber.delete({
+                where: { id },
+            });
         });
     }
 }

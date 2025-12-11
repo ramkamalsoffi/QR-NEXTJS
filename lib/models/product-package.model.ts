@@ -68,8 +68,28 @@ export class ProductPackageModel {
      * Delete a package (cascades to batch numbers)
      */
     static async delete(id: string) {
-        return await prisma.productPackage.delete({
-            where: { id },
+        return await prisma.$transaction(async (tx) => {
+            // Find all batches associated with this package
+            const batches = await tx.batchNumber.findMany({
+                where: { packageId: id },
+                select: { id: true },
+            });
+
+            const batchIds = batches.map((b) => b.id);
+
+            if (batchIds.length > 0) {
+                // Delete all customers associated with these batches
+                await tx.customer.deleteMany({
+                    where: {
+                        batchNoId: { in: batchIds },
+                    },
+                });
+            }
+
+            // Delete the package (cascades to delete batches)
+            return await tx.productPackage.delete({
+                where: { id },
+            });
         });
     }
 }
